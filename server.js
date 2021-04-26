@@ -2,7 +2,6 @@ const inquirer = require("inquirer");
 const mysql = require("mysql");
 const express = require('express')
 const ctable = require("console.table")
-const promisemysql = require("promise-mysql");
 
 const app = express();
 
@@ -33,25 +32,46 @@ const mainMenu = () => {
         choices: ["View All Employees", "Add Employee", "Add Department", "View Departments", "Add Employee Role", "View Employee Roles", "Update Employee Role", "Update Departments", "Update Employees' Managers", "View Employees by Their Manager", "Delete Departments", "Delete Employee Roles", "Delete Employee", "View a Department's Budget", "Exit Application"],
     })
         .then((answer) => {
-            if (answer.mainMenu === "Add Employee") {
-                addEmployee();
-            } else if (answer.mainMenu === "View All Employees") {
-                viewEmployees();
-            } else if (answer.mainMenu === "Add Department") {
-                addDepartment();
-            } else if (answer.mainMenu === "View Departments") {
-                viewDepartments();
-            } else if (answer.mainMenu === "Add Employee Role") {
-                addRole();
-            } else if (answer.mainMenu === "View Employee Roles") {
-                viewRoles();
-            } else if (answer.mainMenu === "Update Employee Role") {
-                updateEmployeeRole();
-            } else {
-                connection.end();
+            switch (answer.mainMenu) {
+                case "Add Employee":
+                    addEmployee();
+                    break;
+
+                case "View All Employees":
+                    viewEmployees();
+                    break;
+
+                case "Add Department":
+                    addDepartment();
+                    break;
+
+                case "View Departments":
+                    viewDepartments();
+                    break;
+
+                case "Add Employee Role":
+                    addRole();
+                    break;
+
+                case "View Employee Roles":
+                    viewRoles();
+                    break;
+
+                case "Update Employee Role":
+                    updateEmployeeRole();
+                    break;
+
+                case "View a Department's Budget":
+                    depBudget();
+                    break;
+
+                case "Exit Application":
+                    connection.end();
+                    break;
             }
-        })
-};
+
+        });
+}
 
 const addEmployee = () => {
     
@@ -111,7 +131,7 @@ const addEmployee = () => {
                                 choices: roleArr
                             },
                         ]).then((answer) => {
-                            selectedRoleId = RoleMap[answer.empRole];
+                            selectedRoleId = roleMap[answer.empRole];
                             selectedRole = answer.empRole;
 
                             connection.query(`SELECT e.id, e.first_name, e.last_name 
@@ -124,9 +144,10 @@ const addEmployee = () => {
                                     let managerMap = {};
                                     let selectedManagerId;
                                     let selectedManager;
+                                    let managerName;
 
                                     for (i = 0; i < res.length; i++) {
-                                        let managerName = res[i].first_name + " " + res[i].last_name;
+                                        managerName = res[i].first_name + " " + res[i].last_name;
                                         managerArr.push(managerName);
                                         managerMap[managerName] = res[i].id;
                                     }
@@ -135,16 +156,19 @@ const addEmployee = () => {
                                             name: "empManager",
                                             type: "list",
                                             message: "Who is employee's manager?",
-                                            choices: managerArr
+                                            choices: [...managerArr, ""]
                                         }
                                     ]).then((answer) => {
+                                        if(answer.empManager === "") {
+                                            managerMap[answer.empManager] = null;
+                                        }
                                         connection.query(
                                             `INSERT INTO employee (first_name, last_name, role_id, manager_id)
-                                            VALUES ("${empFirstName}", "${empLastName}", ${selectedRoleId}, ${managerMap[managerName]})`, (err, res) => {
+                                            VALUES ("${empFirstName}", "${empLastName}", ${selectedRoleId}, ${managerMap[answer.empManager]})`, (err, res) => {
                                                 if (err) throw err;
 
                                                 // Confirms via the console that the new employe has been added
-                                                console.log(`\n ${empFirstName} ${empLastName} has been added to the company as a(n) ${answer.empRole}.\n `);
+                                                console.log(`\n ${empFirstName} ${empLastName} has been added to the company as a(n) ${selectedRole}.\n `);
                                                 mainMenu();
                                             })
                                     })
@@ -158,7 +182,7 @@ const addEmployee = () => {
 }
 
 
-                        // Function to view all the employees of the company
+// Function to view all the employees of the company
 const viewEmployees = () => {
     connection.query(
     `SELECT e.id, e.first_name, e.last_name, r.title, r.salary,COALESCE( CONCAT(m.first_name, " ", m.last_name),'') AS manager FROM employee AS e LEFT JOIN role AS r ON e.role_id = r.id LEFT JOIN department AS d ON r.department_id = d.id LEFT JOIN employee AS m ON m.id = e.manager_id`, (err, res) => {
@@ -350,8 +374,20 @@ const updateEmployeeRole = () => {
 
 
 const depBudget = () => {
-    connection.query(`SELECT `)
-}
+    connection.query(
+    `SELECT d.name, sum(coalesce(r.salary, 0)) budget 
+    FROM department AS d 
+    left join role AS r on d.id = r.department_id
+    left join employee AS e on e.role_id = r.id 
+    group by d.id;`, (err, res) => {
+        if (err) {
+            throw (err);
+        } else {
+            console.table(res);
+            mainMenu();
+        }
+    })
+};
 
 
 
