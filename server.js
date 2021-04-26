@@ -65,6 +65,10 @@ const mainMenu = () => {
                     depBudget();
                     break;
 
+                case "Delete Employee":
+                    deleteEmployee();
+                    break;
+
                 case "Exit Application":
                     connection.end();
                     break;
@@ -388,6 +392,40 @@ const depBudget = () => {
         }
     })
 };
+
+const deleteEmployee = () => {
+    connection.query(
+        `SELECT e.id, e.first_name, e.last_name, r.title, r.salary,COALESCE( CONCAT(m.first_name, " ", m.last_name),'') AS manager FROM employee AS e LEFT JOIN role AS r ON e.role_id = r.id LEFT JOIN department AS d ON r.department_id = d.id LEFT JOIN employee AS m ON m.id = e.manager_id`, (err, res) => {
+            if (err) {
+                throw (err);
+            } else {
+                console.table(res);
+            }
+    })
+    inquirer.prompt([
+        {
+            name: "empDelete",
+            type: "input",
+            message: "Enter the ID of the employee you would like to delete.",
+            validate: function (answer) {
+                if (answer === "") {
+                    console.log("You did not eneter and emploee ID.");
+                    return false;
+                }else if(isNaN(answer)) {
+                    console.log("You must enter the ID of the employee.")
+                } 
+                else{
+                    return true;
+                }
+            }
+        }
+
+    ]).then((answer) => {
+        connection.query(`DELETE FROM employee where ?`, { id: answer.empDelete })
+        console.log(`Employee ${answer.empDelete} has been removed from the company.`)
+        mainMenu();
+    })
+}
 
 
 
