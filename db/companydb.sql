@@ -5,13 +5,13 @@ USE company_db;
 
 CREATE TABLE department (
 	department_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30)
+    name VARCHAR(30) UNIQUE NOT NULL
 );
 
 CREATE TABLE role (
 role_id INT AUTO_INCREMENT PRIMARY KEY,
 title VARCHAR(30),
-salary DECIMAL(4),
+salary DECIMAL(10),
 FOREIGN KEY (role_id) REFERENCES department(department_id)
 );
 
