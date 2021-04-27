@@ -24,6 +24,7 @@ const connection = mysql.createConnection({
     database: "company_db",
 });
 
+// Initial main menu that runs when the program loads is called at the end of every subsequent function 
 const mainMenu = () => {
     inquirer.prompt({
         type: "list",
@@ -469,7 +470,7 @@ const deleteEmployee = () => {
 
 
 
-
+// Initilizes the connection to the server
 connection.connect((err) => {
     if (err) throw err;
     // run the mainMenu function after the connection is made to start the application
