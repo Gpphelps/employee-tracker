@@ -29,7 +29,7 @@ const mainMenu = () => {
         type: "list",
         name: "mainMenu",
         message: "What would you like to do?",
-        choices: ["View All Employees", "Add Employee", "Add Department", "View Departments", "Add Employee Role", "View Employee Roles", "Update Employee Role", "Update Departments", "Update Employees' Managers", "View Employees by Their Manager", "Delete Departments", "Delete Employee Roles", "Delete Employee", "View a Department's Budget", "Exit Application"],
+        choices: ["View All Employees", "Add Employee", "Add Department", "View Departments", "Add Employee Role", "View Employee Roles", "Update Employee Role", "Update Employees' Managers", "View Employees by Their Manager", "Delete Department", "Delete Employee Roles", "Delete Employee", "View a Department's Budget", "Exit Application"],
     })
         .then((answer) => {
             switch (answer.mainMenu) {
@@ -67,6 +67,10 @@ const mainMenu = () => {
 
                 case "Delete Employee":
                     deleteEmployee();
+                    break;
+
+                case "Delete Department":
+                    deleteDept();
                     break;
 
                 case "Exit Application":
@@ -229,10 +233,11 @@ const addDepartment = () => {
 
 const viewDepartments = () => {
     connection.query(
-    `SELECT d.id, d.name, e.first_name, e.last_name
-    FROM department AS d
-    LEFT JOIN role AS r ON d.id = r.department_id
-    LEFT JOIN employee AS e on r.id = e.role_id`, (err, res) => {
+    // `SELECT d.id, d.name, e.first_name, e.last_name
+    // FROM department AS d
+    // LEFT JOIN role AS r ON d.id = r.department_id
+    // LEFT JOIN employee AS e on r.id = e.role_id`
+    `SELECT * FROM department`, (err, res) => {
         if (err) {
             throw (err);
         } else {
@@ -262,7 +267,7 @@ const addRole = () => {
             name: "roleSalary",
             type: "input",
             message: "What is this role's Salary?",
-            // Validates that the user did not leave this field blank
+            // Validates that the user input a number 
                 validate: function (answer) {
                     if (isNaN(answer)) {
                         console.log("Role must have a salary.");
@@ -409,30 +414,62 @@ const deleteEmployee = () => {
             message: "Enter the ID of the employee you would like to delete.",
             validate: function (answer) {
                 if (answer === "") {
-                    console.log("You did not eneter and emploee ID.");
+                    console.log("You did not enter an employee ID.");
                     return false;
                 }else if(isNaN(answer)) {
-                    console.log("You must enter the ID of the employee.")
+                    console.log("You must enter the ID of the employee you wish to delete.")
                 } 
                 else{
                     return true;
                 }
             }
         }
-
     ]).then((answer) => {
-        connection.query(`DELETE FROM employee where ?`, { id: answer.empDelete })
+        connection.query(`DELETE FROM employee WHERE ?`, { id: answer.empDelete })
         console.log(`Employee ${answer.empDelete} has been removed from the company.`)
         mainMenu();
     })
-}
+};
+
+const deleteDept = () => {
+    connection.query(
+        `SELECT * FROM department`, (err, res) => {
+            if (err) {
+                throw (err);
+            } else {
+                console.table(res);
+            }
+    })
+    inquirer.prompt([
+        {
+            name: "dptDelete",
+            type: "input",
+            message: "Enter the ID of the department you would like to delete.",
+            validate: function (answer) {
+                if (answer === "") {
+                    console.log("You did not enter a department ID.");
+                    return false;
+                }else if(isNaN(answer)) {
+                    console.log("You must enter the ID of the department you wish to delete.")
+                } 
+                else{
+                    return true;
+                }
+            }
+        }
+    ]).then((answer) => {
+        connection.query(`DELETE FROM department WHERE id = ${answer.dptDelete} `)
+        console.log(`Department ${answer.dptDelete} has been removed from the company.`)
+        mainMenu();
+    })
+};
 
 
 
 
 connection.connect((err) => {
     if (err) throw err;
-    // run the mainMenu function after the connection is made to prompt the user
+    // run the mainMenu function after the connection is made to start the application
     mainMenu();
 });
 
