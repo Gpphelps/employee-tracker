@@ -1,15 +1,15 @@
+// Dependencies
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 const express = require('express')
 const ctable = require("console.table")
-
 const app = express();
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
+// Sets the information necessary to connect to the server
 const connection = mysql.createConnection({
     host: "localhost",
 
@@ -30,7 +30,7 @@ const mainMenu = () => {
         type: "list",
         name: "mainMenu",
         message: "What would you like to do?",
-        choices: ["View All Employees", "Add Employee", "Add Department", "View Departments", "Add Employee Role", "View Employee Roles", "Update Employee Role", "Update Employees' Managers", "View Employees by Their Manager", "Delete Department", "Delete Employee Roles", "Delete Employee", "View a Department's Budget", "Exit Application"],
+        choices: ["View All Employees", "Add Employee", "Add Department", "View Departments", "Add Employee Role", "View Employee Roles", "Update Employee Role", "Delete Employee", "View a Department's Budget", "Exit Application"],
     })  
     // Switch case to respond to the users input in the mainMenu question
         .then((answer) => {
@@ -71,9 +71,9 @@ const mainMenu = () => {
                     deleteEmployee();
                     break;
 
-                case "Delete Department":
-                    deleteDept();
-                    break;
+                // case "Delete Department":
+                //     deleteDept();
+                //     break;
 
                 case "Exit Application":
                     connection.end();
