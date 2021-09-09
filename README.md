@@ -1,7 +1,7 @@
 # employee-tracker
 
 ## Description
-It is vital for a modern company to be able to keep track of their employees, payroll, and other human resource inofrmation in an eletronic database. The employee tracker application, using a mysql database, allows a company to perform a number of employee related applications to add to their workforce or or remove from it in an effienct and timly manner.
+It is vital for a modern company to be able to keep track of their employees, payroll, and other human resource inofrmation in an eletronic database. The employee tracker application, using a MySQL database, allows a company to perform a number of employee related applications to add to their workforce or or remove from it in an efficient and timely manner.
 
 ## Demonstration
 ![gif](https://media.giphy.com/media/hJB0OvSeaJqxcnfST0/giphy.gif)
